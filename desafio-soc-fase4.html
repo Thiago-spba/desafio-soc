@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio SOC: Invasão Detectada</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --terminal-bg: #010409;
+            --neon-green: #39ff14;
+            --neon-red: #ff073a;
+            --text-main: #c9d1d9;
+            --border-color: #30363d;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--terminal-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.1);
+            position: relative;
+        }
+
+        h1, h2 {
+            color: var(--neon-green);
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .alert-text {
+            color: var(--neon-red);
+            font-weight: bold;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .code-block {
+            background-color: #161b22;
+            padding: 15px;
+            border-left: 3px solid var(--neon-green);
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 15px 0;
+            color: #79c0ff;
+        }
+
+        .btn {
+            background-color: transparent;
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            font-family: 'Courier New', Courier, monospace;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .btn:hover {
+            background-color: rgba(57, 255, 20, 0.1);
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+        }
+
+        .btn.correct { background-color: var(--neon-green); color: #000; }
+        .btn.wrong { background-color: var(--neon-red); color: #fff; border-color: var(--neon-red); }
+
+        .hidden { display: none; }
+
+        #timer-display {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 24px;
+            color: var(--neon-red);
+            font-weight: bold;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .feedback.success { background-color: rgba(57, 255, 20, 0.1); border: 1px solid var(--neon-green); }
+        .feedback.error { background-color: rgba(255, 7, 58, 0.1); border: 1px solid var(--neon-red); }
+
+        .final-report {
+            border: 2px dashed var(--neon-green);
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .hint-box {
+            border: 1px dashed var(--border-color);
+            border-left: 3px solid var(--neon-green);
+            padding: 10px 15px;
+            margin: 15px 0;
+        }
+
+        .hint-box p { margin: 6px 0; }
+
+        .soc-label { display: block; margin: 15px 0 6px; font-weight: bold; }
+
+        textarea.soc-input {
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #161b22;
+            color: #79c0ff;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+        }
+
+        textarea.soc-input:focus { outline: 2px solid var(--neon-green); }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="app">
+        <!-- Timer -->
+        <div id="timer-display" class="hidden">05:00</div>
+
+        <!-- Tela 1: Introdução -->
+        <div id="screen-intro">
+            <h1>⚠️ ALERTA DE INVASÃO</h1>
+            <p><strong>Origem:</strong> Desconhecida</p>
+            <p><strong>Alvo:</strong> Servidor Central (SEDUC)</p>
+            <p>Analista, aqui é o <span style="color: var(--neon-green);">Instrutor Thiago Fernando</span>. Estamos sofrendo um ataque cibernético massivo agora. Nossos sistemas estão gerando milhares de logs (registros) por segundo.</p>
+            <p>Não temos tempo para ler tudo com olhos humanos. Precisamos que você configure o <strong>Sistema de Automação SOC</strong> para isolar as ameaças.</p>
+            <p class="alert-text">Você tem 5 minutos antes que o servidor caia completamente.</p>
+            <button class="btn" onclick="startMission()" style="text-align: center; margin-top: 20px;">[ INICIAR PROTOCOLO DE DEFESA ]</button>
+        </div>
+
+        <!-- Tela 2: Missão 1 -->
+        <div id="screen-q1" class="hidden">
+            <h2>Fase 1: O Filtro de Ameaças</h2>
+            <p>O sistema gera logs como este:</p>
+            <div class="code-block">"2024-07-15 08:42:17 | ERROR | ip=192.168.4.21 | Login failed"</div>
+            <p>Precisamos ensinar o Python a procurar a palavra <strong>"ERROR"</strong> dentro da linha de texto para disparar o alarme. Qual operador faz essa verificação de forma direta (sim ou não)?</p>
+            
+            <button class="btn" onclick="checkAnswer(1, this, false)">A) if linha.find("ERROR"):</button>
+            <button class="btn" onclick="checkAnswer(1, this, true)">B) if "ERROR" in linha:</button>
+            <button class="btn" onclick="checkAnswer(1, this, false)">C) if linha == "ERROR":</button>
+
+            <div id="feedback-1" class="feedback"></div>
+            <button id="next-1" class="btn hidden" onclick="nextScreen('screen-q2')" style="text-align: center; margin-top: 15px;">[ AVANÇAR PARA FASE 2 ]</button>
+        </div>
+
+        <!-- Tela 3: Missão 2 -->
+        <div id="screen-q2" class="hidden">
+            <h2>Fase 2: Fatiando os Dados</h2>
+            <p>Excelente! Agora que encontramos a linha com erro, precisamos extrair apenas o número do IP para bloquear o atacante. O texto é este:</p>
+            <div class="code-block">"2024-07-15 | ERROR | ip=192.168.4.21"</div>
+            <p>O instrutor Thiago ensinou que podemos "fatiar" o texto em pedaços menores. Qual método do Python corta essa string usando o símbolo "|" como separador?</p>
+            
+            <button class="btn" onclick="checkAnswer(2, this, false)">A) linha.cut("|")</button>
+            <button class="btn" onclick="checkAnswer(2, this, false)">B) linha.replace("|")</button>
+            <button class="btn" onclick="checkAnswer(2, this, true)">C) linha.split("|")</button>
+
+            <div id="feedback-2" class="feedback"></div>
+            <button id="next-2" class="btn hidden" onclick="nextScreen('screen-q3')" style="text-align: center; margin-top: 15px;">[ AVANÇAR PARA FASE 3 ]</button>
+        </div>
+
+        <!-- Tela 4: Missão 3 -->
+        <div id="screen-q3" class="hidden">
+            <h2>Fase 3: O Alarme Visual</h2>
+            <p>Conseguimos o IP! Agora precisamos exibir uma mensagem na tela para a equipe de segurança usando as variáveis que extraímos (<b>nivel</b> e <b>ip</b>). Qual é a sintaxe correta para criar uma <strong>F-String</strong> injetando essas variáveis no texto?</p>
+            
+            <button class="btn" onclick="checkAnswer(3, this, false)">A) print("Alerta! Nível: nivel | Origem: ip")</button>
+            <button class="btn" onclick="checkAnswer(3, this, true)">B) print(f"Alerta! Nível: {nivel} | Origem: {ip}")</button>
+            <button class="btn" onclick="checkAnswer(3, this, false)">C) print("Alerta! Nível: {nivel}" + ip)</button>
+
+            <div id="feedback-3" class="feedback"></div>
+            <button id="next-3" class="btn hidden" onclick="startPhase4()" style="text-align: center; margin-top: 15px;">[ AVANÇAR PARA FASE 4 ]</button>
+        </div>
+
+        <!-- Tela 4b: Fase 4 (estruturas de repetição) -->
+        <div id="screen-q4" class="hidden">
+            <h2>Fase 4: O Dilúvio de Logs</h2>
+            <p class="alert-text">Alerta máximo! Chegaram mais logs do que qualquer analista consegue ler.</p>
+            <p>Este código funciona para 5 logs, mas o mesmo bloco foi copiado 5 vezes:</p>
+            <div class="code-block" style="max-height: 300px; overflow-y: auto;">log1 = "2024-07-15 08:42:17 | ERROR | ip=192.168.4.21 | Login failed"
+log2 = "2024-07-15 08:42:19 | INFO | ip=10.0.0.5 | Login ok"
+log3 = "2024-07-15 08:42:21 | ERROR | ip=192.168.4.77 | Login failed"
+log4 = "2024-07-15 08:42:23 | INFO | ip=10.0.0.8 | Login ok"
+log5 = "2024-07-15 08:42:25 | ERROR | ip=192.168.4.90 | Port scan"
+
+if "ERROR" in log1:
+    print(f"Alerta! Origem: {log1.split('|')[2]}")
+if "ERROR" in log2:
+    print(f"Alerta! Origem: {log2.split('|')[2]}")
+if "ERROR" in log3:
+    print(f"Alerta! Origem: {log3.split('|')[2]}")
+if "ERROR" in log4:
+    print(f"Alerta! Origem: {log4.split('|')[2]}")
+if "ERROR" in log5:
+    print(f"Alerta! Origem: {log5.split('|')[2]}")</div>
+            <p>Agora chegaram <strong>1.000 logs</strong>. Copiar esse bloco 1.000 vezes não é possível.</p>
+            <p><strong>Seu desafio:</strong> no seu Python, reescreva o programa para analisar qualquer quantidade de logs, sem copiar o mesmo bloco várias vezes. O resultado tem que continuar sendo <strong>3 alertas</strong>.</p>
+
+            <div class="hint-box">
+                <p><strong>Perguntas para investigar:</strong></p>
+                <p>1. O que o programa já faz com cada log?</p>
+                <p>2. O que mudou agora no desafio?</p>
+                <p>3. Que parte do código se repete?</p>
+                <p>4. O seu código novo mostra os mesmos 3 alertas?</p>
+            </div>
+
+            <label class="soc-label" for="student-code">Cole aqui o seu código novo (teste antes no seu Python):</label>
+            <textarea id="student-code" class="soc-input" rows="8" spellcheck="false"></textarea>
+
+            <label class="soc-label" for="student-explain">Explique com suas palavras: por que a sua solução facilita ampliar o programa?</label>
+            <textarea id="student-explain" class="soc-input" rows="3"></textarea>
+
+            <div id="phase4-msg" class="feedback"></div>
+            <button class="btn" onclick="finishPhase4()" style="text-align: center; margin-top: 15px;">[ ENVIAR PARA O RELATÓRIO ]</button>
+        </div>
+
+        <!-- Tela 5: Final -->
+        <div id="screen-final" class="hidden">
+            <h1 id="final-title"></h1>
+            <p id="final-msg"></p>
+            
+            <div class="final-report">
+                <h3>RELATÓRIO OFICIAL SEDUC</h3>
+                <p><strong>Nome do Operador:</strong> <input type="text" id="student-name" placeholder="Digite seu nome completo" style="background: transparent; color: var(--neon-green); border: none; border-bottom: 1px solid var(--neon-green); font-family: monospace; width: 60%;"></p>
+                <p><strong>Status do Servidor:</strong> <span id="report-status"></span></p>
+                <p><strong>Erros cometidos:</strong> <span id="report-errors"></span></p>
+                <p><strong>Tempo Restante:</strong> <span id="report-time"></span></p>
+                <div id="report-phase4" class="hidden" style="text-align: left;">
+                    <p><strong>Fase 4 (repetição):</strong> <span id="report-loop"></span></p>
+                    <p><strong>Código do operador:</strong></p>
+                    <pre id="report-code" class="code-block"></pre>
+                    <p><strong>Explicação:</strong> <span id="report-explain"></span></p>
+                </div>
+                <p style="margin-top: 20px; font-size: 14px; color: yellow;">ATENÇÃO: Preencha seu nome, tire um PRINT desta tela e envie para comprovação de atividade.</p>
+            </div>
+            <button class="btn" onclick="location.reload()" style="text-align: center; margin-top: 20px;">[ REINICIAR SISTEMA ]</button>
+        </div>
+
+    </div>
+
+    <script>
+        let timer;
+        let timeLeft = 300; // 5 minutos em segundos
+        let errors = 0;
+        let missionActive = false;
+
+        function startMission() {
+            document.getElementById('screen-intro').classList.add('hidden');
+            document.getElementById('screen-q1').classList.remove('hidden');
+            document.getElementById('timer-display').classList.remove('hidden');
+            missionActive = true;
+            
+            timer = setInterval(() => {
+                if (!missionActive) return;
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    endMission(false);
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            let m = Math.floor(timeLeft / 60);
+            let s = timeLeft % 60;
+            document.getElementById('timer-display').innerText = 
+                (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+        }
+
+        function checkAnswer(questionNum, btn, isCorrect) {
+            let feedback = document.getElementById(`feedback-${questionNum}`);
+            let nextBtn = document.getElementById(`next-${questionNum}`);
+            
+            // Desabilita os botões após a resposta correta ser clicada
+            let buttons = btn.parentElement.querySelectorAll('button:not([id^="next"])');
+            
+            if (isCorrect) {
+                btn.classList.add('correct');
+                feedback.classList.remove('error');
+                feedback.classList.add('success');
+                feedback.innerHTML = "✅ Acesso Concedido! Lógica correta.";
+                feedback.style.display = "block";
+                nextBtn.classList.remove('hidden');
+                
+                buttons.forEach(b => b.disabled = true);
+            } else {
+                btn.classList.add('wrong');
+                errors++;
+                feedback.classList.remove('success');
+                feedback.classList.add('error');
+                feedback.innerHTML = "❌ Erro Crítico! O sistema rejeitou o comando. Tente outra abordagem.";
+                feedback.style.display = "block";
+                
+                // Penalidade de tempo por erro (opcional, diminui 15 segundos)
+                timeLeft = Math.max(0, timeLeft - 15);
+                updateTimerDisplay();
+            }
+        }
+
+        function nextScreen(nextId) {
+            let current = document.querySelector('.container > div:not(.hidden):not(#timer-display)');
+            current.classList.add('hidden');
+            document.getElementById(nextId).classList.remove('hidden');
+        }
+
+        function startPhase4() {
+            missionActive = false;
+            clearInterval(timer);
+            document.getElementById('timer-display').classList.add('hidden');
+            nextScreen('screen-q4');
+        }
+
+        function finishPhase4() {
+            let code = document.getElementById('student-code').value.trim();
+            let explain = document.getElementById('student-explain').value.trim();
+            let msg = document.getElementById('phase4-msg');
+
+            if (code === "" || explain === "") {
+                msg.className = "feedback error";
+                msg.innerHTML = "⚠️ Cole o seu código e escreva a explicação antes de enviar.";
+                msg.style.display = "block";
+                return;
+            }
+            endMission(true);
+        }
+
+        function endMission(success) {
+            missionActive = false;
+            clearInterval(timer);
+            
+            let current = document.querySelector('.container > div:not(.hidden):not(#timer-display)');
+            if(current) current.classList.add('hidden');
+            
+            document.getElementById('timer-display').classList.add('hidden');
+            document.getElementById('screen-final').classList.remove('hidden');
+
+            let title = document.getElementById('final-title');
+            let msg = document.getElementById('final-msg');
+            let status = document.getElementById('report-status');
+
+            if (success) {
+                title.innerText = "DEFESAS ATIVADAS COM SUCESSO!";
+                title.style.color = "var(--neon-green)";
+                msg.innerHTML = "Excelente trabalho. Você automatizou a triagem de logs e bloqueou o ataque. O servidor está seguro.";
+                status.innerText = "SEGURO / ONLINE";
+                status.style.color = "var(--neon-green)";
+            } else {
+                title.innerText = "SISTEMA COMPROMETIDO";
+                title.style.color = "var(--neon-red)";
+                msg.innerHTML = "O tempo acabou antes que a automação fosse concluída. Os hackers roubaram os dados.";
+                status.innerText = "OFFLINE / DADOS VAZADOS";
+                status.style.color = "var(--neon-red)";
+            }
+
+            document.getElementById('report-errors').innerText = errors;
+            let m = Math.floor(timeLeft / 60);
+            let s = timeLeft % 60;
+            document.getElementById('report-time').innerText = (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+
+            let codeEl = document.getElementById('student-code');
+            let explainEl = document.getElementById('student-explain');
+            if (codeEl && codeEl.value.trim() !== "") {
+                let usouRepeticao = /\b(for|while)\b/.test(codeEl.value);
+                document.getElementById('report-loop').textContent = usouRepeticao
+                    ? "estrutura de repetição encontrada (for/while)"
+                    : "não encontrei for/while no código";
+                document.getElementById('report-code').textContent = codeEl.value;
+                document.getElementById('report-explain').textContent = explainEl.value;
+                document.getElementById('report-phase4').classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
