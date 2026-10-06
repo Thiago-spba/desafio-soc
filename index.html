@@ -237,7 +237,7 @@ if "ERROR" in log3:
                 <h3>RELATÓRIO OFICIAL SEDUC</h3>
                 <p><strong>Nome do Operador:</strong> <input type="text" id="student-name" placeholder="Digite seu nome completo" style="background: transparent; color: var(--neon-green); border: none; border-bottom: 1px solid var(--neon-green); font-family: monospace; width: 60%;"></p>
                 <p><strong>Status do Servidor:</strong> <span id="report-status"></span></p>
-                <p><strong>Erros cometidos (Fases 1 a 3):</strong> <span id="report-errors"></span></p>
+                <p><strong>Erros cometidos:</strong> <span id="report-errors"></span></p>
                 <p><strong>Tempo Restante:</strong> <span id="report-time"></span></p>
                 <p><strong>Fases 4 e 5 (repetição com for):</strong> <span id="report-loop"></span></p>
                 <p style="margin-top: 20px; font-size: 14px; color: yellow;">ATENÇÃO: Preencha seu nome, tire um PRINT desta tela e envie para comprovação de atividade.</p>
@@ -353,7 +353,7 @@ if "ERROR" in log3:
                 status.style.color = "var(--neon-red)";
             }
 
-            document.getElementById('report-errors').innerText = errors;
+            document.getElementById('report-errors').innerText = errors + errors4;
             let m = Math.floor(timeLeft / 60);
             let s = timeLeft % 60;
             document.getElementById('report-time').innerText = (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
