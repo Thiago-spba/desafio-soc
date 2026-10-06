@@ -115,6 +115,14 @@
             text-align: center;
             margin-top: 20px;
         }
+
+        .btn.code-option {
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .tip { color: #e3b341; margin: 12px 0; }
     </style>
 </head>
 <body>
@@ -174,7 +182,50 @@
             <button class="btn" onclick="checkAnswer(3, this, false)">C) print("Alerta! Nível: {nivel}" + ip)</button>
 
             <div id="feedback-3" class="feedback"></div>
-            <button id="next-3" class="btn hidden" onclick="endMission(true)" style="text-align: center; margin-top: 15px;">[ ATIVAR DEFESAS ]</button>
+            <button id="next-3" class="btn hidden" onclick="startPhase4()" style="text-align: center; margin-top: 15px;">[ AVANÇAR PARA FASE 4 ]</button>
+        </div>
+
+        <!-- Tela 4b: Fase 4 (estruturas de repetição) -->
+        <div id="screen-q4" class="hidden">
+            <h2>Fase 4: O Dilúvio de Logs</h2>
+            <p class="alert-text">Alerta máximo! Agora chegaram 1.000 logs de uma vez.</p>
+            <p>Este código funciona para 3 logs, mas o mesmo bloco foi copiado 3 vezes:</p>
+            <div class="code-block">log1 = "2024-07-15 08:42:17 | ERROR | ip=192.168.4.21 | Login failed"
+log2 = "2024-07-15 08:42:19 | INFO | ip=10.0.0.5 | Login ok"
+log3 = "2024-07-15 08:42:21 | ERROR | ip=192.168.4.77 | Login failed"
+
+if "ERROR" in log1:
+    print(f"Alerta! Origem: {log1.split('|')[2]}")
+if "ERROR" in log2:
+    print(f"Alerta! Origem: {log2.split('|')[2]}")
+if "ERROR" in log3:
+    print(f"Alerta! Origem: {log3.split('|')[2]}")</div>
+            <p class="tip">💡 Repare: de um bloco para o outro, só muda o número do log. A tarefa é sempre a mesma.</p>
+            <p>Imagine que os logs estão numa lista chamada <b>logs</b>. Qual versão faz a mesma tarefa <strong>para cada log da lista</strong>, sem copiar o bloco?</p>
+
+            <button class="btn code-option" onclick="checkAnswer(4, this, false, 'Copiar funciona, mas com 1.000 logs o código fica enorme e cheio de chances de erro.')">A) Copiar o bloco mais 997 vezes, trocando só o número do log</button>
+            <button class="btn code-option" onclick="checkAnswer(4, this, false, 'Sem o <b>for</b>, o Python não olha cada log: ele compara a lista inteira e não mostra nenhum alerta.')">B) if "ERROR" in logs:
+       print(f"Alerta! Origem: {logs.split('|')[2]}")</button>
+            <button class="btn code-option" onclick="checkAnswer(4, this, true, 'O <b>for</b> repete a mesma tarefa para cada item da lista. O código fica do mesmo tamanho com 3 ou com 1.000 logs.')">C) for log in logs:
+       if "ERROR" in log:
+           print(f"Alerta! Origem: {log.split('|')[2]}")</button>
+
+            <div id="feedback-4" class="feedback"></div>
+            <button id="next-4" class="btn hidden" onclick="nextScreen('screen-q5')" style="text-align: center; margin-top: 15px;">[ AVANÇAR PARA FASE 5 ]</button>
+        </div>
+
+        <!-- Tela 4c: Fase 5 (por que a repetição ajuda) -->
+        <div id="screen-q5" class="hidden">
+            <h2>Fase 5: Por que o for ajuda?</h2>
+            <p>O seu código com <b>for</b> continuou do mesmo tamanho, mesmo com 1.000 logs.</p>
+            <p>Por que o <b>for</b> facilita ampliar o programa?</p>
+
+            <button class="btn" onclick="checkAnswer(5, this, false, 'Quem escolhe os logs com ERROR é o <b>if</b>. O <b>for</b> só repete a tarefa.')">A) Porque o Python escolhe sozinho quais logs têm ERROR</button>
+            <button class="btn" onclick="checkAnswer(5, this, true, 'Isso mesmo! Escreve uma vez e vale para 3, para 1.000 ou para 1 milhão de logs.')">B) Porque o mesmo bloco serve para qualquer quantidade de logs</button>
+            <button class="btn" onclick="checkAnswer(5, this, false, 'O <b>for</b> não apaga nada: ele só percorre a lista, um item de cada vez.')">C) Porque o for apaga os logs que já foram lidos</button>
+
+            <div id="feedback-5" class="feedback"></div>
+            <button id="next-5" class="btn hidden" onclick="endMission(true)" style="text-align: center; margin-top: 15px;">[ ATIVAR DEFESAS ]</button>
         </div>
 
         <!-- Tela 5: Final -->
@@ -186,8 +237,9 @@
                 <h3>RELATÓRIO OFICIAL SEDUC</h3>
                 <p><strong>Nome do Operador:</strong> <input type="text" id="student-name" placeholder="Digite seu nome completo" style="background: transparent; color: var(--neon-green); border: none; border-bottom: 1px solid var(--neon-green); font-family: monospace; width: 60%;"></p>
                 <p><strong>Status do Servidor:</strong> <span id="report-status"></span></p>
-                <p><strong>Erros cometidos:</strong> <span id="report-errors"></span></p>
+                <p><strong>Erros cometidos (Fases 1 a 3):</strong> <span id="report-errors"></span></p>
                 <p><strong>Tempo Restante:</strong> <span id="report-time"></span></p>
+                <p><strong>Fases 4 e 5 (repetição com for):</strong> <span id="report-loop"></span></p>
                 <p style="margin-top: 20px; font-size: 14px; color: yellow;">ATENÇÃO: Preencha seu nome, tire um PRINT desta tela e envie para comprovação de atividade.</p>
             </div>
             <button class="btn" onclick="location.reload()" style="text-align: center; margin-top: 20px;">[ REINICIAR SISTEMA ]</button>
@@ -200,6 +252,8 @@
         let timeLeft = 300; // 5 minutos em segundos
         let errors = 0;
         let missionActive = false;
+        let errors4 = 0;          // erros nas Fases 4 e 5
+        let phase4Active = false; // true depois que a Fase 4 começa
 
         function startMission() {
             document.getElementById('screen-intro').classList.add('hidden');
@@ -225,7 +279,7 @@
                 (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
         }
 
-        function checkAnswer(questionNum, btn, isCorrect) {
+        function checkAnswer(questionNum, btn, isCorrect, extra) {
             let feedback = document.getElementById(`feedback-${questionNum}`);
             let nextBtn = document.getElementById(`next-${questionNum}`);
             
@@ -236,22 +290,24 @@
                 btn.classList.add('correct');
                 feedback.classList.remove('error');
                 feedback.classList.add('success');
-                feedback.innerHTML = "✅ Acesso Concedido! Lógica correta.";
+                feedback.innerHTML = "✅ Acesso Concedido! Lógica correta." + (extra ? "<br>" + extra : "");
                 feedback.style.display = "block";
                 nextBtn.classList.remove('hidden');
                 
                 buttons.forEach(b => b.disabled = true);
             } else {
                 btn.classList.add('wrong');
-                errors++;
+                if (phase4Active) { errors4++; } else { errors++; }
                 feedback.classList.remove('success');
                 feedback.classList.add('error');
-                feedback.innerHTML = "❌ Erro Crítico! O sistema rejeitou o comando. Tente outra abordagem.";
+                feedback.innerHTML = "❌ Erro Crítico! O sistema rejeitou o comando. Tente outra abordagem." + (extra ? "<br>" + extra : "");
                 feedback.style.display = "block";
                 
                 // Penalidade de tempo por erro (opcional, diminui 15 segundos)
-                timeLeft = Math.max(0, timeLeft - 15);
-                updateTimerDisplay();
+                if (!phase4Active) {
+                    timeLeft = Math.max(0, timeLeft - 15);
+                    updateTimerDisplay();
+                }
             }
         }
 
@@ -259,6 +315,14 @@
             let current = document.querySelector('.container > div:not(.hidden):not(#timer-display)');
             current.classList.add('hidden');
             document.getElementById(nextId).classList.remove('hidden');
+        }
+
+        function startPhase4() {
+            missionActive = false;
+            clearInterval(timer);
+            phase4Active = true;
+            document.getElementById('timer-display').classList.add('hidden');
+            nextScreen('screen-q4');
         }
 
         function endMission(success) {
@@ -293,6 +357,9 @@
             let m = Math.floor(timeLeft / 60);
             let s = timeLeft % 60;
             document.getElementById('report-time').innerText = (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+            document.getElementById('report-loop').innerText = phase4Active
+                ? "concluídas, com " + errors4 + " erro(s)"
+                : "não realizadas";
         }
     </script>
 </body>
